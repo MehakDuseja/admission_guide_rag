@@ -1,0 +1,134 @@
+================================================================
+  COURSE OUTLINE QA SYSTEM — SETUP & USAGE GUIDE
+================================================================
+
+WHAT THIS PROJECT DOES
+-----------------------
+You can ask natural language questions about course outlines
+for the BE Computer Systems program (batches 2014, 2018, 2025)
+and get answers grounded in the actual documents.
+
+Example questions:
+  - "What topics are covered in Data Structures for batch 2018?"
+  - "What are the credit hours for Operating Systems in batch 2025?"
+  - "Which year does AI appear in the 2025 curriculum?"
+
+
+PREREQUISITES
+--------------
+Make sure you have Python 3.10 or higher installed.
+Check by running:  python --version
+
+
+STEP 1 — Create a virtual environment
+---------------------------------------
+Open a terminal in this project folder and run:
+
+  python -m venv .venv
+
+Then activate it:
+
+  Windows:   .venv\Scripts\activate
+  Mac/Linux: source .venv/bin/activate
+
+You should see (.venv) at the start of your terminal prompt.
+
+
+STEP 2 — Install dependencies
+--------------------------------
+With the virtual environment active, run:
+
+  pip install -r requirements.txt
+
+This will take a few minutes the first time.
+
+
+STEP 3 — Get a Gemini API key
+--------------------------------
+1. Go to https://aistudio.google.com
+2. Sign in with a Google account
+3. Click "Get API Key"
+4. Copy the key
+
+
+STEP 4 — Create your .env file
+---------------------------------
+In the project folder, create a file named exactly:  .env
+
+Open it and add this line (replace with your actual key):
+
+  GEMINI_API_KEY=paste_your_key_here
+
+Note: The .env.example file in this folder shows the format.
+
+
+STEP 5 — Run ingestion (only once)
+-------------------------------------
+This reads the PDFs, breaks them into chunks, and stores them
+in a local database so you can query them later.
+
+  python ingest.py
+
+You should see logs like:
+  [LOADER     ] Found 3 PDF(s)
+  [CHUNKER    ] Total chunks created: ...
+  [EMBEDDER   ] Embedding model ready.
+  [VECTORSTORE] Stored ... chunk(s) in ChromaDB successfully.
+
+The embedding model (~22MB) downloads automatically on first run.
+You only need to run ingest.py ONCE. After that, skip to Step 6.
+
+
+STEP 6 — Ask questions
+-------------------------
+Single question:
+  python query.py "What topics are in AI for batch 2018?"
+
+Interactive mode (ask multiple questions):
+  python query.py
+
+Type 'exit' to quit interactive mode.
+
+
+DEBUG MODE
+-----------
+If an answer seems wrong or unexpected, run with --debug to see
+exactly what text was retrieved from the documents:
+
+  python ingest.py --debug        (shows chunk contents during ingestion)
+  python query.py --debug         (shows retrieved chunks during querying)
+  python query.py "question" --debug
+
+
+PROJECT STRUCTURE
+------------------
+docs/           → the PDF course outlines (do not rename these files)
+src/            → the code modules (one file per pipeline stage)
+  loader.py     → reads PDFs
+  chunker.py    → splits text into chunks
+  embedder.py   → loads the embedding model
+  vectorstore.py→ saves/loads ChromaDB
+  retriever.py  → searches for relevant chunks
+  generator.py  → calls Gemini and returns the answer
+ingest.py       → run once to process PDFs
+query.py        → run to ask questions
+config.py       → all settings in one place
+
+
+TROUBLESHOOTING
+----------------
+"ModuleNotFoundError"
+  → Make sure your virtual environment is activated (.venv\Scripts\activate)
+
+"GEMINI_API_KEY not set" or authentication error
+  → Check that your .env file exists and has the correct key
+
+"Vector store not found"
+  → Run python ingest.py first
+
+Bad or irrelevant answers
+  → Run with --debug and check which chunks were retrieved
+  → If wrong batch is being searched, make sure you mention the
+    batch year in your question (e.g. "in batch 2025")
+
+================================================================
