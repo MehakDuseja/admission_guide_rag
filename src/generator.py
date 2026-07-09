@@ -57,6 +57,7 @@ Rules you must follow:
    present in the CONTEXT, ask which batch they mean OR briefly summarize all of
    them, whichever is more helpful given the question.
 6. dont give me half responses try to give full responses dont cut off 
+7. Now that i have added the FAQ section to the context, you can use it to answer questions about the program.
 
 CONTEXT:
 {context}
@@ -189,3 +190,4 @@ def generate_answer(query: str, retrieved_results: list, chain) -> str:
 
     logger.info("Answer received.")
     return answer
+#jds
