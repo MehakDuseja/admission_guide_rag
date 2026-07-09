@@ -172,7 +172,7 @@ import config
 
 logger = get_logger("RETRIEVER")
 
-KNOWN_BATCHES = ["2014", "2018", "2025"]
+DEFAULT_SOURCE_NAMES = ["2014", "2018", "2025", "FAQ"]
 COURSE_ABBREVIATIONS = {
     "CA": "Computer Architecture",
     "OS": "Operating Systems",
@@ -217,11 +217,38 @@ def _normalize_query(query: str) -> str:
     return normalized
 
 
-def _detect_batch_year(query: str) -> str | None:
-    """Return the first batch year found in the query, or None."""
-    for year in KNOWN_BATCHES:
-        if year in query:
+def _collect_available_sources(vectorstore) -> list[str]:
+    """Return all distinct source/batch labels present in the vector store metadata."""
+    try:
+        result = vectorstore.get(include=["metadatas"])
+        metadatas = result.get("metadatas", []) if isinstance(result, dict) else []
+    except Exception as exc:
+        logger.debug(f"Could not inspect vector store metadata: {exc}")
+        return []
+
+    sources = []
+    for metadata in metadatas:
+        if not isinstance(metadata, dict):
+            continue
+        source_value = metadata.get("batch_year") or metadata.get("source")
+        if source_value:
+            sources.append(str(source_value))
+
+    return sorted(set(sources))
+
+
+def _detect_batch_year(query: str, vectorstore=None) -> str | None:
+    """Return the first batch year/source found in the query, or None."""
+    for year in DEFAULT_SOURCE_NAMES:
+        if year.lower() in query.lower():
             return year
+
+    if vectorstore is not None:
+        available_sources = _collect_available_sources(vectorstore)
+        for source_name in available_sources:
+            if source_name.lower() in query.lower():
+                return source_name
+
     return None
 
 
@@ -231,10 +258,10 @@ def retrieve(query: str, vectorstore) -> list:
     if normalized_query != query:
         logger.info(f"Normalized query to: \"{normalized_query}\"")
 
-    batch_year = _detect_batch_year(normalized_query)
+    batch_year = _detect_batch_year(normalized_query, vectorstore)
 
     if batch_year:
-        logger.info(f"Batch year '{batch_year}' detected — filtering search to that batch only.")
+        logger.info(f"Source '{batch_year}' detected — filtering search to that source only.")
         results = vectorstore.similarity_search_with_score(
             normalized_query,
             k=config.TOP_K,
@@ -243,23 +270,27 @@ def retrieve(query: str, vectorstore) -> list:
 
         if not results:
             logger.warning(
-                f"No chunks found for batch {batch_year}. "
-                f"Falling back to search across all batches."
+                f"No chunks found for source {batch_year}. "
+                f"Falling back to search across all sources."
             )
             results = vectorstore.similarity_search_with_score(normalized_query, k=config.TOP_K)
     else:
-        logger.info("No specific batch year detected — performing round-robin batch retrieval.")
+        logger.info("No specific source detected — performing round-robin retrieval across available sources.")
         results = []
-        
-        # Explicitly query each batch so no single batch dominates the results
-        for batch in KNOWN_BATCHES:
-            batch_results = vectorstore.similarity_search_with_score(
+
+        available_sources = _collect_available_sources(vectorstore)
+        if not available_sources:
+            available_sources = DEFAULT_SOURCE_NAMES
+
+        # Explicitly query each available source so FAQ and other PDFs are included
+        for source_name in available_sources:
+            source_results = vectorstore.similarity_search_with_score(
                 normalized_query,
-                k=max(3, config.TOP_K // len(KNOWN_BATCHES)),
-                filter={"batch_year": batch}
+                k=max(2, config.TOP_K // max(1, len(available_sources))),
+                filter={"batch_year": source_name}
             )
-            results.extend(batch_results)
-            logger.info(f"  Pulled {len(batch_results)} chunks for batch {batch}")
+            results.extend(source_results)
+            logger.info(f"  Pulled {len(source_results)} chunks for source {source_name}")
 
         # Fallback if the metadata filters returned completely empty results
         if not results:
