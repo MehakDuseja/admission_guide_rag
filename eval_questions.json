@@ -1,0 +1,17 @@
+[
+  {
+    "id": "q1",
+    "question": "Who is eligible to apply for Admission?",
+    "expected_keywords": ["eligible", "admission", "HSC", "equivalent"]
+  },
+  {
+    "id": "q2",
+    "question": "What are the admission requirements?",
+    "expected_keywords": ["admission", "requirement", "eligible", "exam"]
+  },
+  {
+    "id": "q3",
+    "question": "What is the eligibility for admission in 2025?",
+    "expected_keywords": ["2025", "eligible", "admission"]
+  }
+]
