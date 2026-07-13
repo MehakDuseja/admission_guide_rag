@@ -50,6 +50,7 @@ Rules you must follow:
 7. EMPTY CONTEXT: If the CONTEXT is empty or irrelevant to the question, say so explicitly rather than fabricating an answer.
 
 8. NO SOURCE CLUTTER: Do not display citations, source tags, or document names as inline references in the final answer (use them internally only to organize/attribute facts, e.g., "In the 2018 batch... / In the 2025 batch...").
+9. DEFINATION : Define whenever user ask about the terms you can define it dont say you do not know use your knowledege to define it
 
 CONTEXT:
 {context}
@@ -167,14 +168,6 @@ def generate_answer(query: str, retrieved_results: list, chain) -> str:
 
     context = "\n\n".join(context_parts)
 
-    # direct_answer = _extract_course_code(query, retrieved_results)
-    # if direct_answer:
-    #     logger.info(f"Using direct course-code extraction:\n{direct_answer}")
-    #     if "\n" in direct_answer:
-    #         # multiple batches matched with (possibly) different codes
-    #         return "The course code has changed across batches:\n" + direct_answer
-    #     return f"The course code is {direct_answer}."
-
     logger.debug(f"Full context being sent to Gemini:\n{'─'*60}\n{context}\n{'─'*60}")
     logger.info("Sending context + question to Gemini...")
 
@@ -182,4 +175,3 @@ def generate_answer(query: str, retrieved_results: list, chain) -> str:
 
     logger.info("Answer received.")
     return answer
-#jds
