@@ -13,5 +13,90 @@
     "id": "q3",
     "question": "What is the eligibility for admission in 2025?",
     "expected_keywords": ["2025", "eligible", "admission"]
+  },
+  {
+    "id": "q4",
+    "question": "How can I get the admission form?",
+    "expected_keywords": ["admission", "form", "portal"]
+  },
+  {
+    "id": "q5",
+    "question": "What is the minimum percentage required for admission?",
+    "expected_keywords": ["minimum", "percentage", "admission", "60"]
+  },
+  {
+    "id": "q6",
+    "question": "What is the merit criterion for undergraduate admission?",
+    "expected_keywords": ["merit", "admission", "score", "entry"]
+  },
+  {
+    "id": "q7",
+    "question": "How should I take an additional non-credit course?",
+    "expected_keywords": ["non-credit", "course", "additional", "fee"]
+  },
+  {
+    "id": "q8",
+    "question": "What should I do if I cannot register on the admission portal?",
+    "expected_keywords": ["register", "portal", "email", "helpdesk"]
+  },
+  {
+    "id": "q9",
+    "question": "What should I do if I cannot log in to the admission portal?",
+    "expected_keywords": ["login", "password", "portal", "case"]
+  },
+  {
+    "id": "q10",
+    "question": "How can I pay the application fee?",
+    "expected_keywords": ["application", "fee", "transaction", "bank"]
+  },
+  {
+    "id": "q11",
+    "question": "How do I get my pre-admission entry test admit card?",
+    "expected_keywords": ["admit", "card", "fee", "portal"]
+  },
+  {
+    "id": "q12",
+    "question": "What should I do after passing the pre-admission entry test?",
+    "expected_keywords": ["entry", "test", "admission", "schedule"]
+  },
+  {
+    "id": "q13",
+    "question": "Where can I submit the admission form?",
+    "expected_keywords": ["submit", "admission", "form", "office"]
+  },
+  {
+    "id": "q14",
+    "question": "Can I apply for any additional category?",
+    "expected_keywords": ["additional", "category", "eligible", "apply"]
+  },
+  {
+    "id": "q15",
+    "question": "What are the admission requirements for religious minorities?",
+    "expected_keywords": ["religious", "minorities", "admission", "resident"]
+  },
+  {
+    "id": "q16",
+    "question": "Are DAE holders eligible to apply for admissions?",
+    "expected_keywords": ["DAE", "eligible", "apply", "admission"]
+  },
+  {
+    "id": "q17",
+    "question": "What are the passing marks in entry tests?",
+    "expected_keywords": ["passing", "marks", "entry", "test"]
+  },
+  {
+    "id": "q18",
+    "question": "How many times can a candidate appear in the entry test?",
+    "expected_keywords": ["entry", "test", "twice", "candidate"]
+  },
+  {
+    "id": "q19",
+    "question": "What is the duration of degree programs offered by the university?",
+    "expected_keywords": ["duration", "degree", "programs", "four"]
+  },
+  {
+    "id": "q20",
+    "question": "Where are the architecture and development studies classes held?",
+    "expected_keywords": ["architecture", "development", "studies", "campus"]
   }
 ]

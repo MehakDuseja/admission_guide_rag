@@ -23,9 +23,11 @@ COLLECTION_NAME = "course_outlines"
 # A slightly larger value helps general questions pull context from multiple PDFs.
 TOP_K = 8
 
-# Evaluation dataset for RAG benchmarking
-EVAL_DATASET_PATH = BASE_DIR / "eval_questions.json"
-
 # Gemini LLM
 GEMINI_MODEL   = "gemini-2.5-flash"
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Evaluation settings
+EVAL_DATASET_PATH = BASE_DIR / "eval_questions.json"
+EVAL_LIMIT = int(os.getenv("EVAL_LIMIT", "5"))
+EVAL_TIMEOUT_SECONDS = int(os.getenv("EVAL_TIMEOUT_SECONDS", "20"))
