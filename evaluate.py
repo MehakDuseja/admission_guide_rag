@@ -9,6 +9,7 @@ It reports:
 """
 
 import json
+import signal
 from pathlib import Path
 from collections import Counter
 
@@ -19,22 +20,45 @@ from src.generator import build_chain, generate_answer
 import config
 
 
+class TimeoutException(Exception):
+    pass
+
+
+def _raise_timeout(signum, frame):
+    raise TimeoutException("evaluation timed out")
+
+
 def run_evaluation(dataset_path: Path | None = None) -> dict:
     dataset_path = dataset_path or config.EVAL_DATASET_PATH
     with open(dataset_path, "r", encoding="utf-8") as fh:
         dataset = json.load(fh)
 
+    if config.EVAL_LIMIT:
+        dataset = dataset[: config.EVAL_LIMIT]
+
     embedder = load_embedder()
     vectorstore = load_vectorstore(embedder)
     chain = build_chain()
 
+    signal.signal(signal.SIGALRM, _raise_timeout)
     results = []
     for item in dataset:
         question = item["question"]
         expected_keywords = item.get("expected_keywords", [])
 
         retrieved = retrieve(question, vectorstore)
-        answer = generate_answer(question, retrieved, chain)
+        signal.alarm(config.EVAL_TIMEOUT_SECONDS)
+        try:
+            answer = generate_answer(question, retrieved, chain)
+            error = None
+        except TimeoutException as exc:
+            answer = f"[ERROR] {exc}"
+            error = str(exc)
+        except Exception as exc:
+            answer = f"[ERROR] {exc}"
+            error = str(exc)
+        finally:
+            signal.alarm(0)
 
         sources = [doc.metadata.get("source", "unknown") for doc, _ in retrieved]
         source_counter = Counter(sources)
@@ -54,7 +78,8 @@ def run_evaluation(dataset_path: Path | None = None) -> dict:
             "expected_keywords": expected_keywords,
             "matched_keywords": matched_keywords,
             "supported_by_pdf": supported_by_pdf,
-            "passed": len(matched_keywords) >= 1 and supported_by_pdf,
+            "error": error,
+            "passed": len(matched_keywords) >= 1 and supported_by_pdf and error is None,
         })
 
     return {
@@ -89,6 +114,9 @@ def _print_report(summary: dict) -> None:
         print("Matched keywords:")
         print(f"  • {', '.join(item['matched_keywords']) or 'none'}")
         print(f"\nVerified from PDF: {'yes' if item['supported_by_pdf'] else 'no'}")
+        if item.get("error"):
+            print("Model error:")
+            print(f"  • {item['error']}")
         print("─" * 40)
 
 
